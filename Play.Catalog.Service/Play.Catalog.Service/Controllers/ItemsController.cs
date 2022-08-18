@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Play.Catalog.Service.Dtos;
+using Play.Catalog.Service.Repos;
+using Play.Catalog.Service.Entities;
 
 namespace Play.Catalog.Service.Controllers
 {
@@ -7,82 +9,86 @@ namespace Play.Catalog.Service.Controllers
     [Route("api/items")]
     public class ItemsController : ControllerBase
     {
-        private static readonly List<ItemDto> items = new List<ItemDto>{
-            new ItemDto(Guid.NewGuid(), "Potion", "Restores 10 health points", 5, DateTime.UtcNow),
-            new ItemDto(Guid.NewGuid(), "Rage", "Increases attack", 15, DateTime.UtcNow),
-            new ItemDto(Guid.NewGuid(), "Poison", "Removes 10 health points", 25, DateTime.UtcNow)
-        };
+        // private static readonly List<ItemDto> items = new List<ItemDto>{
+        //     new ItemDto(Guid.NewGuid(), "Potion", "Restores 10 health points", 5, DateTime.UtcNow),
+        //     new ItemDto(Guid.NewGuid(), "Rage", "Increases attack", 15, DateTime.UtcNow),
+        //     new ItemDto(Guid.NewGuid(), "Poison", "Removes 10 health points", 25, DateTime.UtcNow)
+        // };
+
+        private readonly ItemsRepository repository = new();
 
         [HttpGet]
         [Route("[action]")]
-        public IEnumerable<ItemDto> Get()
+        public async Task<IEnumerable<ItemDto>> GetAsync()
         {
+            var items = (await repository.GetAllAsync())
+                        .Select(x => x.AsDto());
             return items;
         }
 
         [HttpGet]
         [Route("[action]")]
-        public ActionResult<ItemDto> GetById(Guid id)
+        public async Task<ActionResult<ItemDto>> GetByIdAsync(Guid id)
         {
-            var item = items.Where(x => x.Id == id).SingleOrDefault();
+            var item = await repository.GetAsync(id);
 
             if (item == null)
             {
                 return NotFound();
             }
 
-            return item;
+            return item.AsDto();
         }
 
         [HttpPost]
         [Route("[action]")]
-        public ActionResult<ItemDto> Create(CreateItemDto dto)
+        public async Task<ActionResult<ItemDto>> CreateAsync(CreateItemDto dto)
         {
-            var item = new ItemDto(Guid.NewGuid(), dto.Name, dto.Desc, dto.Price, DateTime.UtcNow);
-            items.Add(item);
+            var item = new Item
+            {
+                Name = dto.Name,
+                Description = dto.Desc,
+                Price = dto.Price,
+                CreateDate = DateTime.UtcNow
+            };
 
-            return CreatedAtAction("Created item", items.Last());
+            await repository.CreateAsync(item);
+
+            return CreatedAtAction("Created item", item);
         }
 
         [HttpPut]
         [Route("[action]")]
-        public ActionResult<ItemDto> Update(Guid id, UpdateItemDto dto)
+        public async Task<ActionResult<ItemDto>> UpdateAsync(Guid id, UpdateItemDto dto)
         {
-            var itemToUpdate = items.Where(x => x.Id == id).SingleOrDefault();
+            var itemToUpdate = await repository.GetAsync(id);
 
             if (itemToUpdate == null)
             {
                 return NotFound();
             }
 
-            var updatedItem = itemToUpdate with
-            {
-                Name = dto.Name,
-                Desc = dto.Desc,
-                Price = dto.Price
-            };
+            itemToUpdate.Name = dto.Name;
+            itemToUpdate.Description = dto.Desc;
+            itemToUpdate.Price = dto.Price;
 
-            // var index = items.FindIndex(x => x.Id == updatedItem.Id);
-            var index = items.IndexOf(itemToUpdate);
-            items[index] = updatedItem;
+            await repository.UpdateAsync(itemToUpdate);
 
             return NoContent();
         }
 
         [HttpDelete]
         [Route("[action]")]
-        public IActionResult Remove(Guid id)
+        public async Task<IActionResult> RemoveAsync(Guid id)
         {
-            // var index = items.FindIndex(x => x.Id == id);
-            // items.RemoveAt(index);
-            var itemToDelete = items.Where(x => x.Id == id).SingleOrDefault();
+            var itemToRemove = await repository.GetAsync(id);
 
-            if (itemToDelete == null)
+            if (itemToRemove == null)
             {
                 return NotFound();
             }
 
-            items.Remove(itemToDelete);
+            await repository.DeleteAsync(itemToRemove.Id);
 
             return NoContent();
         }
