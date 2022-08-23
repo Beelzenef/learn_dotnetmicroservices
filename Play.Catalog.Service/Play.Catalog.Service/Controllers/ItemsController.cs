@@ -54,7 +54,7 @@ namespace Play.Catalog.Service.Controllers
 
             await repository.CreateAsync(item);
 
-            return CreatedAtAction("Created item", item);
+            return Ok(item);
         }
 
         [HttpPut]
