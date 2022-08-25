@@ -1,18 +1,14 @@
 using Play.Catalog.Service.Settings;
 using Play.Catalog.Service.Repos;
+using Play.Catalog.Service.Entities;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddSingleton<IMongoDatabase>(options =>
-{
-    var mongoSettings = builder.Configuration.GetSection("MongoDBSettings").Get<MongoDBSettings>();
-    var serviceSettings = builder.Configuration.GetSection("ServiceSettings").Get<ServiceSettings>();
-    var client = new MongoClient(mongoSettings.ConnectionString);
-    return client.GetDatabase(serviceSettings.ServiceName);
-});
-builder.Services.AddSingleton<IItemsRepository, ItemsRepository>();
+builder.Services
+    .AddMongo(builder.Configuration)
+    .AddMongRepo<Item>("items");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

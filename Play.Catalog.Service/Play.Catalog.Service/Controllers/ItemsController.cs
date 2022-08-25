@@ -15,9 +15,9 @@ namespace Play.Catalog.Service.Controllers
         //     new ItemDto(Guid.NewGuid(), "Poison", "Removes 10 health points", 25, DateTime.UtcNow)
         // };
 
-        private readonly IItemsRepository repository;
+        private readonly IRepository<Item> repository;
 
-        public ItemsController(IItemsRepository repo)
+        public ItemsController(IRepository<Item> repo)
         {
             repository = repo ?? throw new ArgumentNullException(nameof(repo));
         }
