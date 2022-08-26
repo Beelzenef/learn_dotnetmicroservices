@@ -1,8 +1,9 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using Play.Catalog.Service.Entities;
-using Play.Catalog.Service.Settings;
+using Play.Common.Settings;
 
-namespace Play.Catalog.Service.Repos
+namespace Play.Common.MongoDB
 {
     public static class Extensions
     {

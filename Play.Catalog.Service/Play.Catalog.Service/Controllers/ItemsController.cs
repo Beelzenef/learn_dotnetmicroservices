@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Play.Catalog.Service.Dtos;
-using Play.Catalog.Service.Repos;
+using Play.Common;
 using Play.Catalog.Service.Entities;
 
 namespace Play.Catalog.Service.Controllers
