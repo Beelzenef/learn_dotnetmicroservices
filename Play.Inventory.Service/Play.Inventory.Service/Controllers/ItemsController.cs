@@ -2,19 +2,23 @@ using Play.Common;
 using Play.Inventory.Service.Entities;
 using Play.Inventory.Service.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Play.Inventory.Service.Clients;
 
 namespace Play.Inventory.Service.Controllers
 {
 
     [ApiController]
-    [Route("items")]
+    [Route("api/inventory")]
     public class ItemsController : Controller
     {
         private readonly IRepository<InventoryItem> inventoryRepository;
+        private readonly CatalogClient catalogClient;
 
-        public ItemsController(IRepository<InventoryItem> repo)
+        public ItemsController(IRepository<InventoryItem> repo,
+            CatalogClient client)
         {
             inventoryRepository = repo ?? throw new ArgumentNullException(nameof(repo));
+            catalogClient = client;
         }
 
         [HttpGet]
@@ -25,10 +29,19 @@ namespace Play.Inventory.Service.Controllers
                 return BadRequest();
             }
 
-            var items = (await inventoryRepository
-                            .GetAllAsync(item => item.UserId == userId))
-                            .Select(item => item.AsDto());
-            return Ok(items);
+            var catalogItems = await catalogClient.GetCatalogItemsAsync();
+            var inventoryItemEntities = await inventoryRepository.GetAllAsync(item => item.UserId == userId);
+
+            var inventoryItemDtos = inventoryItemEntities.Select(inventoryItem =>
+            {
+                var catalogItem = catalogItems.Single(catalogItem => catalogItem.Id == inventoryItem.CatalogItemId);
+                return inventoryItem.AsDto(catalogItem.Name, catalogItem.Desc);
+            });
+
+            // var items = (await inventoryRepository
+            //                 .GetAllAsync(item => item.UserId == userId))
+            //                 .Select(item => item.AsDto());
+            return Ok(inventoryItemDtos);
         }
 
         [HttpPost]
