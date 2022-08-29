@@ -17,6 +17,8 @@ namespace Play.Catalog.Service.Controllers
 
         private readonly IRepository<Item> repository;
 
+        private static int requestCounter = 0;
+
         public ItemsController(IRepository<Item> repo)
         {
             repository = repo ?? throw new ArgumentNullException(nameof(repo));
@@ -24,11 +26,29 @@ namespace Play.Catalog.Service.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        public async Task<IEnumerable<ItemDto>> GetAsync()
+        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAsync()
         {
+            requestCounter++;
+            Console.WriteLine($"Request {requestCounter}: Starting...");
+
+            if (requestCounter <= 2)
+            {
+                Console.WriteLine($"Request {requestCounter}: Delaying...");
+                await Task.Delay(TimeSpan.FromSeconds(10));
+            }
+
+            if (requestCounter <= 4)
+            {
+                Console.WriteLine($"Request {requestCounter}: (t)ERROR 500...");
+                return StatusCode(500);
+            }
+
             var items = (await repository.GetAllAsync())
                         .Select(x => x.AsDto());
-            return items;
+
+            Console.WriteLine($"Request {requestCounter}: This is fine!");
+
+            return Ok(items);
         }
 
         [HttpGet]

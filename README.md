@@ -8,13 +8,13 @@ Learn the foundational elements of a microservices architecture with .NET in thi
 
 ## Modules
 
-- Module 1- Welcome to the course!
-- Module 2- Your first microservice
-- Module 3- Adding database storage
-- Module 4- Preparing for the next microservice
-- Module 5- Synchronous inter-service communication
-- Module 6- Asynchronous inter-service communication
-- Module 7- Initial Frontend Integration
+- Module 1: Welcome to the course!
+- Module 2: Your first microservice
+- Module 3: Adding database storage
+- Module 4: Preparing for the next microservice
+- Module 5: Synchronous inter-service communication
+- Module 6: Asynchronous inter-service communication
+- Module 7: Initial Frontend Integration
 
 ### Using
 
